@@ -62,7 +62,7 @@ void pinSetup() {
 
 
 
-void SendLEDColorToWeb() {
+void sendLEDColorToWeb() {
     if (currentLed == nullptr) return;
 
     switch (currentLed->color) {
@@ -85,7 +85,7 @@ void lightLED() {
         digitalWrite(currentLed->pin, LOW);
         currentLed = currentLed->nextLed;
         digitalWrite(currentLed->pin, HIGH);
-        SendLEDColorToWeb();
+        sendLEDColorToWeb();
     }
 
     if (isPaused && currentTime >= pauseEndTime) {
@@ -149,7 +149,8 @@ void checkWiFi() {
 
 void setup() {
     Serial.begin(115200);
-    delay(9000);
+    delay(100);
+    Serial.println();
     if (!LittleFS.begin()) {
         return;
     }
