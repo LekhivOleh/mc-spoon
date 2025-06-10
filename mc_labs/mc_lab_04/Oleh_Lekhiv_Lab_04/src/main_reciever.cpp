@@ -54,28 +54,22 @@ void handlePowerOff() {
 }
 
 void handleVolUp() {
+  if (!isOn) return;
   if (volumeLevel < maxVolume) volumeLevel++;
   drawVolumeBar();
 }
 
 void handleVolDown() {
+  if (!isOn) return;
   if (volumeLevel > 0) volumeLevel--;
   drawVolumeBar();
-}
-
-void handleInput() {
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_ncenB08_tr);
-  u8g2.drawStr(10, 30, "HDMI1");
-  u8g2.sendBuffer();
 }
 
 std::map<String, std::function<void()>> commandHandlers = {
   {"POWER", handlePower},
   {"POWER_OFF", handlePowerOff},
   {"VOL_UP", handleVolUp},
-  {"VOL_DOWN", handleVolDown},
-  {"INPUT", handleInput},
+  {"VOL_DOWN", handleVolDown}
 };
 
 void setup_wifi() {
@@ -94,16 +88,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (unsigned int i = 0; i < length; i++) {
     rawMsg += (char)payload[i];
   }
-
-  Serial.print("Received MQTT: ");
-  Serial.println(rawMsg);
-
+  
   String cmd = irCodeToCommand.count(rawMsg) ? irCodeToCommand[rawMsg] : rawMsg;
 
   if (commandHandlers.count(cmd)) {
-    if (cmd == "POWER" || cmd == "POWER_OFF" || isOn) {
-      commandHandlers[cmd]();
-    }
+    commandHandlers[cmd]();
   }
 }
 
@@ -127,11 +116,6 @@ void setup() {
   client.setCallback(callback);
 
   u8g2.begin();
-  u8g2.setPowerSave(false);
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_ncenB08_tr);
-  u8g2.drawStr(10, 30, "Waiting MQTT...");
-  u8g2.sendBuffer();
 }
 
 void loop() {

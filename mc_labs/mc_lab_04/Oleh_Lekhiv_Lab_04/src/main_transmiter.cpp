@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include <IRrecv.h>
 #include <IRutils.h>
 #include "env.h"
 
@@ -67,8 +66,6 @@ void loop() {
     if (irrecv.decode(&results)) {
         String irCode = resultToHexidecimal(&results);
         client.publish(topic, irCode.c_str());
-        Serial.print("Published IR code: ");
-        Serial.println(irCode);
         irrecv.resume();
     }
 }

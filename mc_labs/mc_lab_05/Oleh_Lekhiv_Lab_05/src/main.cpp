@@ -53,6 +53,16 @@ void drawZones(uint8_t filled) {
     u8g2.sendBuffer();
 }
 
+void clearZones() {
+    u8g2.clearBuffer();
+    uint8_t startX = (128 - rectWidth) / 2;
+    for (uint8_t i = 0; i < zoneCount; ++i) {
+        uint8_t y = (zoneCount - 1 - i) * rectHeight;
+        u8g2.drawFrame(startX, y, rectWidth, rectHeight);
+    }
+    u8g2.sendBuffer();
+}
+
 void setup() {
     pinMode(TRIG_PIN, OUTPUT);
     pinMode(ECHO_PIN, INPUT);
@@ -64,7 +74,12 @@ void setup() {
 void loop() {
     uint32_t currentTime = millis();
 
-    drawZones(getFilledZones(lastDistance));
+    bool validDistance = lastDistance > 0 && lastDistance <= maxZoneDistance;
+    if (validDistance) {
+        drawZones(getFilledZones(lastDistance));
+    } else {
+        clearZones();
+    }
 
     if (currentTime - previousTriggerTime >= triggerInterval) {
         previousTriggerTime = currentTime;
@@ -85,13 +100,14 @@ void loop() {
                 buzzerState = LOW;
             }
         } else {
+            lastDistance = 0;
             currentBeepInterval = 0;
             digitalWrite(BUZZER_PIN, LOW);
             buzzerState = LOW;
         }
     }
 
-    if (currentBeepInterval > 0 && lastDistance <= maxZoneDistance) {
+    if (currentBeepInterval > 0 && lastDistance <= maxZoneDistance && lastDistance > 0) {
         if (currentTime - previousBeepToggleTime >= currentBeepInterval) {
             previousBeepToggleTime = currentTime;
             buzzerState = !buzzerState;
